@@ -1,0 +1,62 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Sat Jun 03 00:44:59 2017
+
+@author: REd
+Merge CSV files 
+"""
+import csv
+import time
+from path import path
+
+class JsonToCsv:
+    def __init__(self):
+        self.path = 'data/'
+        self.t_files = []
+        
+    def listFiles(self):
+        "list csv files"
+        for f in path(self.path).walkfiles():
+            if f.endswith('.csv'):
+                self.t_files.append(f)
+        
+    def toOneCSV(self):
+        "convert json files to csv file"
+        all_rows_data = []
+        nb_files = len(self.t_files)
+        if nb_files > 0:
+            #print self.t_files
+            try:
+                nbfile = 0
+                csvheader = []
+                for f in self.t_files:
+                    print "\n #Convert ",f
+                    csvfile = open(f, "rb")
+                    csvreader = csv.reader(csvfile)
+                    nbrow = 0
+                    for row in csvreader:
+                        if nbfile == 0 and nbrow == 0:
+                            csvheader = row
+                        if nbrow > 0:
+                            all_rows_data.append(row)
+                        nbrow +=1
+                    nbfile +=1
+                            
+                nowdate = time.ctime()
+                PJ_data = open(self.path+'/All_'+nowdate.replace(' ','_').replace(':','_')+'_.csv', 'w')
+                # create the csv writer object
+                csvwriter = csv.writer(PJ_data, lineterminator = '\n')
+                # add header line
+                csvwriter.writerow(csvheader)
+                #add data lines
+                for row_data in all_rows_data:
+                    csvwriter.writerow(row_data)
+                PJ_data.close()
+                print "\n Done.",nbfile," files found"
+            except IndexError:
+                print 'NO data'
+        
+if __name__ == '__main__': 
+    trans = JsonToCsv()
+    trans.listFiles()
+    trans.toOneCSV()
